@@ -1,0 +1,80 @@
+rule AcmeNetworkAdminPermissionSystem {
+  description: "can READ the system registries"
+  participant: "ANY"
+  operation: READ
+  resource: "org.hyperledger.composer.system.**"
+  action: ALLOW  
+}
+
+rule NetworkControlPermission {
+  description:  "give admin ALL access to system resources"
+  participant: "org.hyperledger.composer.system.NetworkAdmin"
+  operation: ALL
+  resource: "org.hyperledger.composer.system.*"
+  action: ALLOW  
+}
+rule ParticipantRegistryControlPermission {
+  description:  "give admin ALL access to ACME participant types"
+  participant: "org.hyperledger.composer.system.NetworkAdmin"
+  operation: ALL
+  resource: "org.acme.airline.participant.*"
+  action: ALLOW  
+}
+
+rule AcmeParticipantPermissionHistorian {
+  description: "can write HistorianRecord to the Historian"
+  participant: "org.acme.airline.participant.ACMEPersonnel"
+  operation: CREATE
+  resource: "org.hyperledger.composer.system.HistorianRecord"
+  action: ALLOW  
+}
+
+// #3.2 Needed for Creating the "CreateFlight" transaction
+// Only employees @ ACME can execute this transaction
+rule ACMEPersonnelPermission {
+  description: "only ACME personnel can create a flight"
+  participant: "org.acme.airline.participant.ACMEPersonnel"
+  operation: CREATE
+  resource: "org.acme.airline.flight.*"
+  transaction: "org.acme.airline.flight.CreateFlight"
+  action: ALLOW
+}
+
+// This is an example of recursive access to the resource
+// This rule will work the same way as the one above but
+// It gives the transaction access to both Flight & Aircraft
+// To try it out simply UNCOMMENT statements below & COMMENT 
+// the rule above
+/****
+rule ACMEPersonnelPermission {
+  description: "only ACME personnel can create a flight"
+  participant: "org.acme.airline.participant.ACMEPersonnel"
+  operation: CREATE
+  resource: "org.acme.airline.**"
+  transaction: "org.acme.airline.flight.CreateFlight"
+  action: ALLOW
+}
+****/
+
+
+
+
+
+
+
+
+// #4 Exercise Solution
+// ====================
+// UN-COMMENT the RULE below To Test
+// Comment the 'ACMEPersonnelPermission' rule above
+/**********************
+rule ACMEPersonnelPermission {
+  description: "only ACME personnel can create a flight"
+  participant(p): "org.acme.airline.participant.ACMEPersonnel"
+  operation: CREATE
+  resource(r): "org.acme.airline.flight.*"
+  transaction: "org.acme.airline.flight.CreateFlight"
+  condition: (p.department=='Logistics')
+  action: ALLOW
+}
+***************************/
